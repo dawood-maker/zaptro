@@ -1,52 +1,18 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState } from "react";
 import { useData } from "../context/DataContext";
 
-const Carousel = () => {
-  const { data = [], loading, error } = useData();
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [hoveredButton, setHoveredButton] = useState(null);
-  const [hoveredShopButton, setHoveredShopButton] = useState(null);
-
-  // Go to next slide
-  const goToNext = useCallback(() => {
-    if (data.length > 0) {
-      setCurrentIndex((prev) => (prev === data.length - 1 ? 0 : prev + 1));
-    }
-  }, [data.length]);
-
-  // Go to previous slide
-  const goToPrevious = useCallback(() => {
-    if (data.length > 0) {
-      setCurrentIndex((prev) => (prev === 0 ? data.length - 1 : prev - 1));
-    }
-  }, [data.length]);
-
-  // Auto slide every 4 seconds
-  useEffect(() => {
-    if (data.length > 1) {
-      const interval = setInterval(goToNext, 4000);
-      return () => clearInterval(interval);
-    }
-  }, [data.length, goToNext]);
-
-  // Go to specific slide
-  const goToSlide = (index) => {
-    setCurrentIndex(index);
-  };
-
-  // Reset to first slide when data loads
-  useEffect(() => {
-    if (data.length > 0) {
-      setCurrentIndex(0);
-    }
-  }, [data.length]);
+const Category = () => {
+  const { data, loading, error } = useData();
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-[600px] text-2xl text-white bg-gradient-to-r from-[#0f0c29] via-[#302B63] to-[#24243e] rounded-2xl">
+      <div className="flex justify-center items-center min-h-[400px]">
         <div className="flex flex-col items-center gap-4">
-          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-yellow-400"></div>
-          <p>Loading Products...</p>
+          <div className="animate-spin rounded-full h-12 w-12 md:h-16 md:w-16 border-t-4 border-b-4 border-blue-600"></div>
+          <div className="text-xl md:text-2xl text-gray-600">
+            Loading categories...
+          </div>
         </div>
       </div>
     );
@@ -54,153 +20,186 @@ const Carousel = () => {
 
   if (error) {
     return (
-      <div className="flex justify-center items-center h-[600px] text-2xl text-white bg-gradient-to-r from-[#0f0c29] via-[#302B63] to-[#24243e] rounded-2xl">
+      <div className="flex justify-center items-center min-h-[400px] px-4">
         <div className="text-center">
-          <p className="text-red-400 mb-4">⚠️ Error Loading Products</p>
-          <p className="text-lg">{error}</p>
+          <div className="text-xl md:text-2xl text-red-600 mb-4">
+            ❌ Error: {error}
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="bg-blue-600 text-white px-4 py-2 md:px-6 md:py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm md:text-base"
+          >
+            Retry
+          </button>
         </div>
       </div>
     );
   }
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="flex justify-center items-center h-[600px] text-2xl text-white bg-gradient-to-r from-[#0f0c29] via-[#302B63] to-[#24243e] rounded-2xl">
-        No Products Available
-      </div>
-    );
-  }
+  // Get unique categories from products
+  const uniqueCategories = [...new Set(data.map((item) => item.category))];
 
-  // Current product to display
-  const currentProduct = data[currentIndex];
+  // Filter products based on selected category
+  const filteredProducts =
+    selectedCategory === "all"
+      ? data
+      : data.filter((item) => item.category === selectedCategory);
 
   return (
-    <div className="relative w-full max-w-[1400px] mx-auto overflow-hidden rounded-2xl shadow-2xl my-8">
-      {/* Previous Button */}
-      <button
-        className={`absolute top-1/2 left-4 -translate-y-1/2 text-white text-4xl p-4 rounded-full z-20 transition-all duration-300 ${
-          hoveredButton === "left" ? "bg-black/80 scale-110" : "bg-black/50"
-        }`}
-        onClick={goToPrevious}
-        onMouseEnter={() => setHoveredButton("left")}
-        onMouseLeave={() => setHoveredButton(null)}
-        aria-label="Previous slide"
-      >
-        ❮
-      </button>
+    <div className="container mx-auto px-4 py-6 md:py-8">
+      {/* Page Title */}
+      <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-3 md:mb-4 text-center text-gray-800">
+        Product Categories
+      </h1>
+      <p className="text-center text-sm md:text-base text-gray-600 mb-8 md:mb-10">
+        Browse our collection of {data.length} products across{" "}
+        {uniqueCategories.length} categories
+      </p>
 
-      {/* Main Slide Container */}
-      <div className="overflow-hidden bg-gradient-to-r from-[#0f0c29] via-[#302B63] to-[#24243e] h-[600px]">
-        <div className="h-full flex items-center">
-          {/* Single Slide Display */}
-          <div className="min-w-full flex flex-col md:flex-row items-center gap-8 px-10 py-8">
-            {/* Product Info - Left Side */}
-            <div className="flex-1 text-white bg-white/10 backdrop-blur-sm p-8 rounded-2xl max-w-[600px]">
-              {/* Category Badge */}
-              <div className="mb-4">
-                <span className="bg-yellow-400 text-black text-xs font-bold px-4 py-2 rounded-full uppercase tracking-wide">
-                  {currentProduct.category}
-                </span>
+      {/* Categories Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6 mb-8 md:mb-12">
+        {/* All Products Card */}
+        <div
+          onClick={() => setSelectedCategory("all")}
+          className={`bg-gradient-to-br from-purple-500 to-purple-700 rounded-lg md:rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
+            selectedCategory === "all" ? "ring-2 md:ring-4 ring-purple-400" : ""
+          }`}
+        >
+          <div className="h-32 md:h-48 flex items-center justify-center bg-white/10">
+            <span className="text-4xl md:text-6xl">🛍️</span>
+          </div>
+          <div className="p-3 md:p-4 text-white">
+            <p className="text-sm md:text-xl font-bold text-center">
+              All Products
+            </p>
+            <p className="text-xs md:text-sm text-center mt-1 md:mt-2 opacity-90">
+              {data.length} Products
+            </p>
+          </div>
+        </div>
+
+        {/* Category Cards */}
+        {uniqueCategories.map((category, index) => {
+          const categoryProduct = data.find(
+            (item) => item.category === category,
+          );
+          const categoryCount = data.filter(
+            (item) => item.category === category,
+          ).length;
+
+          return (
+            <div
+              key={index}
+              onClick={() => setSelectedCategory(category)}
+              className={`bg-white rounded-lg md:rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 cursor-pointer transform hover:scale-105 ${
+                selectedCategory === category
+                  ? "ring-2 md:ring-4 ring-blue-400"
+                  : ""
+              }`}
+            >
+              <div className="h-32 md:h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                {categoryProduct && (
+                  <img
+                    src={categoryProduct.image}
+                    alt={category}
+                    className="h-full w-full object-contain p-2 md:p-4 hover:scale-110 transition-transform duration-300"
+                  />
+                )}
               </div>
+              <div className="p-3 md:p-4 bg-gradient-to-r from-blue-50 to-purple-50">
+                <p className="text-sm md:text-xl font-bold text-gray-800 capitalize text-center line-clamp-1">
+                  {category}
+                </p>
+                <p className="text-xs md:text-sm text-gray-600 text-center mt-1 md:mt-2">
+                  {categoryCount} {categoryCount === 1 ? "Product" : "Products"}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Selected Category Title */}
+      <div className="mb-6 md:mb-8">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1 md:mb-2">
+          {selectedCategory === "all"
+            ? "All Products"
+            : selectedCategory.toUpperCase()}
+        </h2>
+        <p className="text-sm md:text-base text-gray-600">
+          Showing {filteredProducts.length}{" "}
+          {filteredProducts.length === 1 ? "product" : "products"}
+        </p>
+      </div>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+        {filteredProducts.map((item) => (
+          <div
+            key={item.id}
+            className="bg-white rounded-lg md:rounded-xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2"
+          >
+            {/* Product Image */}
+            <div className="h-48 md:h-64 bg-gray-100 flex items-center justify-center p-3 md:p-4 overflow-hidden">
+              <img
+                src={item.image}
+                alt={item.title}
+                className="max-h-full max-w-full object-contain hover:scale-110 transition-transform duration-300"
+              />
+            </div>
+
+            {/* Product Info */}
+            <div className="p-3 md:p-4">
+              {/* Category Badge */}
+              <span className="inline-block bg-blue-100 text-blue-800 text-xs font-semibold px-2 md:px-3 py-1 rounded-full mb-2 capitalize">
+                {item.category}
+              </span>
 
               {/* Product Title */}
-              <h2 className="text-3xl md:text-4xl font-bold mb-4 leading-tight">
-                {currentProduct.title}
-              </h2>
-
-              {/* Product Description */}
-              <p className="mb-6 opacity-90 text-base leading-relaxed">
-                {currentProduct.description}
-              </p>
+              <h3 className="font-bold text-sm md:text-base text-gray-800 mb-2 line-clamp-2 h-10 md:h-12">
+                {item.title}
+              </h3>
 
               {/* Rating */}
-              {currentProduct.rating && (
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="flex text-yellow-400 text-xl">
+              {item.rating && (
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex text-yellow-500 text-xs md:text-sm">
                     {[...Array(5)].map((_, i) => (
                       <span key={i}>
-                        {i < Math.round(currentProduct.rating.rate) ? "★" : "☆"}
+                        {i < Math.round(item.rating.rate) ? "★" : "☆"}
                       </span>
                     ))}
                   </div>
-                  <span className="text-sm opacity-80">
-                    {currentProduct.rating.rate} ({currentProduct.rating.count} reviews)
+                  <span className="text-xs text-gray-600">
+                    ({item.rating.count})
                   </span>
                 </div>
               )}
 
-              {/* Price */}
-              <div className="text-yellow-400 text-4xl font-bold mb-8">
-                ${currentProduct.price}
-              </div>
-
-              {/* Shop Now Button */}
-              <button
-                className={`bg-yellow-400 text-black px-10 py-4 rounded-full font-bold text-lg transition-all duration-300 hover:bg-yellow-300 shadow-lg ${
-                  hoveredShopButton === currentIndex ? "scale-105 shadow-2xl" : ""
-                }`}
-                onMouseEnter={() => setHoveredShopButton(currentIndex)}
-                onMouseLeave={() => setHoveredShopButton(null)}
-              >
-                Shop Now
-              </button>
-            </div>
-
-            {/* Product Image - Right Side */}
-            <div className="flex-1 flex items-center justify-center">
-              <div className="bg-white rounded-2xl p-8 shadow-2xl w-full max-w-[450px]">
-                <img
-                  src={currentProduct.image}
-                  alt={currentProduct.title}
-                  className="w-full h-[400px] object-contain"
-                  loading="eager"
-                />
+              {/* Price and Button */}
+              <div className="flex items-center justify-between">
+                <span className="text-xl md:text-2xl font-bold text-green-600">
+                  ${item.price}
+                </span>
+                <button className="bg-blue-600 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg hover:bg-blue-700 transition-colors duration-300 text-xs md:text-sm font-semibold">
+                  Add to Cart
+                </button>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-
-      {/* Next Button */}
-      <button
-        className={`absolute top-1/2 right-4 -translate-y-1/2 text-white text-4xl p-4 rounded-full z-20 transition-all duration-300 ${
-          hoveredButton === "right" ? "bg-black/80 scale-110" : "bg-black/50"
-        }`}
-        onClick={goToNext}
-        onMouseEnter={() => setHoveredButton("right")}
-        onMouseLeave={() => setHoveredButton(null)}
-        aria-label="Next slide"
-      >
-        ❯
-      </button>
-
-      {/* Dots Navigation */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-2 bg-black/30 px-4 py-2 rounded-full backdrop-blur-sm">
-        {data.slice(0, Math.min(data.length, 10)).map((_, index) => (
-          <button
-            key={index}
-            onClick={() => goToSlide(index)}
-            className={`rounded-full transition-all duration-300 ${
-              index === currentIndex
-                ? "bg-yellow-400 w-8 h-3"
-                : "bg-white/50 w-3 h-3 hover:bg-white/70"
-            }`}
-            aria-label={`Go to slide ${index + 1}`}
-          />
         ))}
-        {data.length > 10 && (
-          <span className="text-white text-xs self-center ml-2">
-            +{data.length - 10} more
-          </span>
-        )}
       </div>
 
-      {/* Slide Counter */}
-      <div className="absolute top-6 right-6 bg-black/50 backdrop-blur-sm text-white px-4 py-2 rounded-full text-sm font-semibold">
-        {currentIndex + 1} / {data.length}
-      </div>
+      {/* No Products Message */}
+      {filteredProducts.length === 0 && (
+        <div className="text-center py-12 md:py-16">
+          <p className="text-xl md:text-2xl text-gray-400">
+            No products found in this category
+          </p>
+        </div>
+      )}
     </div>
   );
 };
 
-export default Carousel;
+export default Category;
