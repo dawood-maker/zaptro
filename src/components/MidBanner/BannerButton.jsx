@@ -1,6 +1,6 @@
 function BannerButton() {
   return (
-    <button className="bg-red-500 hover:bg-red-600 px-8 py-3 rounded-xl font-semibold transition-all duration-300 hover:scale-105">
+    <button className="bg-red-500 hover:bg-red-600 px-6 sm:px-8 py-2 sm:py-3 rounded-xl font-semibold transition-all duration-300 transform hover:scale-105">
       Shop Now
     </button>
   );
