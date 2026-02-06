@@ -46,30 +46,24 @@ export default function Sidebar({
           />
         </div>
 
-        {/* Category Section */}
+        {/* Category Dropdown */}
         <div>
           <h3 className="font-semibold text-lg mb-3">Categories</h3>
-          <div className="flex flex-col gap-3">
+          <select
+            value={selectedCategory}
+            onChange={(e) => {
+              setSelectedCategory(e.target.value);
+              setIsOpen(false); // close sidebar on mobile
+            }}
+            className="w-full p-3 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-300 transition-all duration-300 outline-none cursor-pointer"
+          >
+            <option value="ALL">All Categories</option>
             {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => {
-                  setSelectedCategory(cat);
-                  setIsOpen(false); // close sidebar on mobile
-                }}
-                className={`
-                  text-left px-4 py-2 rounded-xl transition-all duration-200
-                  ${
-                    selectedCategory === cat
-                      ? "bg-red-500 text-white shadow-md"
-                      : "bg-gray-100 hover:bg-red-100 hover:scale-105"
-                  }
-                `}
-              >
+              <option key={cat} value={cat}>
                 {cat}
-              </button>
+              </option>
             ))}
-          </div>
+          </select>
         </div>
 
         {/* Price Range */}
