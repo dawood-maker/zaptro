@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 
 export default function Sidebar({
   categories,
@@ -7,47 +7,103 @@ export default function Sidebar({
   price,
   setPrice,
 }) {
+  const [search, setSearch] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+
   const handleReset = () => {
     setSelectedCategory("ALL");
     setPrice(5000);
+    setSearch("");
   };
 
   return (
-    <div className="p-4 bg-white rounded-xl shadow">
-      <input
-        className="w-full p-2 border rounded mb-4"
-        placeholder="Search..."
-      />
-
-      <h3 className="font-semibold mb-2">Category</h3>
-      {categories.map((cat) => (
-        <label key={cat} className="flex items-center gap-2 text-sm mb-1">
-          <input
-            type="radio"
-            checked={selectedCategory === cat}
-            onChange={() => setSelectedCategory(cat)}
-          />
-          {cat}
-        </label>
-      ))}
-
-      <h3 className="font-semibold mt-4">Price Range</h3>
-      <input
-        type="range"
-        min="0"
-        max="5000"
-        value={price}
-        onChange={(e) => setPrice(Number(e.target.value))}
-        className="w-full mt-2"
-      />
-      <p className="text-sm mt-1">$0 - ${price}</p>
-
+    <>
+      {/* Mobile toggle button */}
       <button
-        onClick={handleReset}
-        className="mt-4 w-full bg-red-500 text-white py-2 rounded"
+        className="md:hidden fixed top-6 left-4 z-50 p-3 bg-red-500 text-white rounded-full shadow-lg hover:bg-red-600 transition-transform transform hover:scale-110"
+        onClick={() => setIsOpen(!isOpen)}
       >
-        Reset Filters
+        {isOpen ? "✕" : "☰"}
       </button>
-    </div>
+
+      {/* Sidebar */}
+      <div
+        className={`
+          fixed top-0 left-0 h-full w-72 p-6 bg-white rounded-r-2xl shadow-2xl space-y-6 z-40
+          transform transition-transform duration-300 ease-in-out
+          ${isOpen ? "translate-x-0" : "-translate-x-full"}
+          md:relative md:translate-x-0 md:w-72 md:rounded-2xl md:shadow-none
+        `}
+      >
+        {/* Search Box */}
+        <div>
+          <input
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search products..."
+            className="w-full p-3 rounded-xl border border-gray-300 focus:border-red-500 focus:ring-2 focus:ring-red-300 transition-all duration-300 outline-none"
+          />
+        </div>
+
+        {/* Category Section */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Categories</h3>
+          <div className="flex flex-col gap-3">
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => {
+                  setSelectedCategory(cat);
+                  setIsOpen(false); // close sidebar on mobile
+                }}
+                className={`
+                  text-left px-4 py-2 rounded-xl transition-all duration-200
+                  ${
+                    selectedCategory === cat
+                      ? "bg-red-500 text-white shadow-md"
+                      : "bg-gray-100 hover:bg-red-100 hover:scale-105"
+                  }
+                `}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Price Range */}
+        <div>
+          <h3 className="font-semibold text-lg mb-3">Price Range</h3>
+          <input
+            type="range"
+            min="0"
+            max="5000"
+            value={price}
+            onChange={(e) => setPrice(Number(e.target.value))}
+            className="w-full accent-red-500 cursor-pointer"
+          />
+          <p className="mt-2 text-gray-600 font-medium">$0 - ${price}</p>
+        </div>
+
+        {/* Reset Button */}
+        <div>
+          <button
+            onClick={handleReset}
+            className="w-full py-3 bg-red-500 text-white rounded-xl font-semibold shadow-lg hover:bg-red-600 transition-transform transform hover:scale-105"
+          >
+            Reset Filters
+          </button>
+        </div>
+      </div>
+
+      {/* Overlay for mobile */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-30 md:hidden z-30 transition-opacity duration-300"
+          onClick={() => setIsOpen(false)}
+        />
+      )}
+    </>
   );
 }
