@@ -9,6 +9,7 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
+import Footer from "./components/Footer";
 
 function App() {
   const [userLocation, setUserLocation] = useState(null);
@@ -62,6 +63,7 @@ function App() {
           <Route path="/cart" element={<Cart />} />
         </Routes>
       </div>
+      <Footer />
     </BrowserRouter>
   );
 }
