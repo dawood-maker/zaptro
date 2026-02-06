@@ -1,8 +1,7 @@
-function Contact() {
-    return (
-        <div>
-            <h1 className="text-4xl font-bold text-center mt-10">Welcome to the Contact Page</h1>
-        </div>
-    );
+import Contact from "../components/Contact/Contact";
+
+function ContactPage() {
+  return <Contact />;
 }
-export default Contact;     
+
+export default ContactPage;     
