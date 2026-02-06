@@ -1,10 +1,10 @@
 // src/pages/Home.jsx
-import Carousel from "../components/Carousel";
+import Category from "./Category";
 
 function Home() {
   return (
     <>
-      <Carousel />
+      <Category />
     </>
   );
 }
