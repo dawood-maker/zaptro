@@ -1,12 +1,11 @@
 import { useEffect } from "react";
-import noresultsImg from "../../assets/noresults.png";
+import noresultsVideo from "../../assets/noresults.mp4";
 
 export default function NoResults({ handleReset }) {
 
-  // 🔍 Component mount log
   useEffect(() => {
     console.log("🚫 NoResults Component Rendered");
-    console.log("🖼 Image Path:", noresultsImg);
+    console.log("🎬 Video Path:", noresultsVideo);
   }, []);
 
   const handleResetClick = () => {
@@ -18,13 +17,15 @@ export default function NoResults({ handleReset }) {
     <div className="flex items-center justify-center py-24 px-4">
       <div className="max-w-lg w-full text-center bg-white rounded-3xl shadow-xl p-10">
         
-        {/* Illustration */}
-        <img
-          src={noresultsImg}
-          alt="No results found"
-          className="w-64 mx-auto mb-6"
-          onLoad={() => console.log("✅ NoResults image loaded successfully")}
-          onError={() => console.error("❌ Failed to load NoResults image")}
+        {/* Video Illustration */}
+        <video
+          src={noresultsVideo}
+          autoPlay
+          loop
+          muted
+          className="w-64 mx-auto mb-6 rounded-xl"
+          onLoadedData={() => console.log("✅ NoResults video loaded successfully")}
+          onError={() => console.error("❌ Failed to load NoResults video")}
         />
 
         {/* Title */}
