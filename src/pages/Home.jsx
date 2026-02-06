@@ -1,5 +1,5 @@
 // src/pages/Home.jsx
-import Features from "../components/Features";
+import Features from "../components/Features/Features";
 import MidBanner from "../components/MidBanner/MidBanner";
 import Category from "./Category";
 
