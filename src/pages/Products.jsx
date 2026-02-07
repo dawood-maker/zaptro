@@ -23,6 +23,7 @@ export default function ProductsPage() {
   // ===============================
   useEffect(() => {
     async function fetchProducts() {
+      window.scrollTo(0, 0);
       try {
         console.log("⏳ Fetching products...");
         setLoading(true);
