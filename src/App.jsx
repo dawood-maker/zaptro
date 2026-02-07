@@ -10,6 +10,7 @@ import Contact from "./pages/Contact";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Footer from "./components/Footer";
+import SingleProducts from "./pages/SingleProducts";
 
 function App() {
   const [userLocation, setUserLocation] = useState(null);
@@ -37,10 +38,9 @@ function App() {
           ip: data.query,
         };
 
-        console.log("✅ User location data:", locationData);
         setUserLocation(locationData);
       } catch (err) {
-        console.error("❌ Error fetching location data:", err);
+        console.error("Location error:", err);
         setUserLocation({ city: "Unknown", country: "Unknown" });
       } finally {
         setLoading(false);
@@ -60,9 +60,14 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/products" element={<Products />} />
+
+          {/* ✅ SINGLE PRODUCT ROUTE (FIXED) */}
+          <Route path="/product/:id" element={<SingleProducts />} />
+
           <Route path="/cart" element={<Cart />} />
         </Routes>
       </div>
+
       <Footer />
     </BrowserRouter>
   );
