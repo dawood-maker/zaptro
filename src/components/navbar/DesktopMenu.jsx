@@ -6,19 +6,32 @@ import {
   UserButton,
 } from "@clerk/clerk-react";
 import NavLinks from "./NavLinks";
+import { useCart } from "../../context/CartContext";
 
-function DesktopMenu({ location }) {
+function DesktopMenu({ location, closeMenu }) {
+  // Get cart items from context
+  const { cartItems } = useCart(); // assuming your context returns an object with cartItems array
+
   return (
     <>
       {/* Desktop Menu */}
       <div className="hidden md:flex items-center gap-6 text-sm font-semibold">
         <NavLinks location={location} />
 
+        {/* Desktop Cart Button with Badge */}
         <a
           href="/cart"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#c2a46d] text-black font-semibold hover:bg-[#887248] transition"
+          className="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-[#c2a46d] text-black font-semibold hover:bg-[#887248] transition"
         >
           <ShoppingCart className="w-5 h-5" />
+
+          {/* Badge */}
+          {cartItems.length > 0 && (
+            <span className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+              {cartItems.length}
+            </span>
+          )}
+
           Cart
         </a>
 
@@ -49,11 +62,21 @@ function DesktopMenu({ location }) {
       <div className="md:hidden flex flex-col gap-4 mt-2">
         <NavLinks location={location} mobile />
 
+        {/* Mobile Cart Button with Badge */}
         <a
           href="/cart"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-[#c2a46d] text-black font-semibold hover:bg-yellow-400 transition"
+          className="relative flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#c2a46d] text-black font-semibold hover:bg-yellow-400 transition"
+          onClick={closeMenu}
         >
           <ShoppingCart className="w-5 h-5" />
+
+          {/* Badge */}
+          {cartItems.length > 0 && (
+            <span className="absolute top-0 right-3 -translate-y-1/2 translate-x-1/2 bg-red-600 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
+              {cartItems.length}
+            </span>
+          )}
+
           Cart
         </a>
 

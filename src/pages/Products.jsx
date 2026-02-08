@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useCart } from "../context/CartContext";
+
 import Sidebar from "../components/Sidebar";
 import ProductGrid from "../components/product/ProductGrid";
 import MobileFilters from "../components/FilterPanel/MobileFilter";
@@ -8,7 +10,9 @@ import ErrorState from "../components/states/ErrorState";
 import EmptyState from "../components/states/EmptyState";
 import NoResults from "../components/states/NoResults";
 
-export default function ProductsPage() {
+export default function Products() {
+  const { addToCart } = useCart();
+
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState(["ALL"]);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
@@ -18,21 +22,16 @@ export default function ProductsPage() {
   const [error, setError] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // ===============================
-  // 🔥 FETCH PRODUCTS + LOGS
-  // ===============================
+  // Fetch products
   useEffect(() => {
     async function fetchProducts() {
-      window.scrollTo(0, 0);
       try {
-        console.log("⏳ Fetching products...");
         setLoading(true);
 
         const res = await fetch("https://fakestoreapi.com/products");
         if (!res.ok) throw new Error("Failed to fetch products");
 
         const data = await res.json();
-        console.log("✅ API Raw Data:", data);
 
         const mappedData = data.map((item) => ({
           id: item.id,
@@ -43,69 +42,47 @@ export default function ProductsPage() {
           rating: item.rating,
         }));
 
-        console.log("🛒 Mapped Products:", mappedData);
-
         setProducts(mappedData);
         setCategories(["ALL", ...new Set(mappedData.map((p) => p.category))]);
         setError(null);
       } catch (err) {
-        console.error("❌ Product Fetch Error:", err);
         setError(err.message);
       } finally {
         setLoading(false);
-        console.log("✅ Fetch Complete");
       }
     }
 
     fetchProducts();
   }, []);
 
-  // ===============================
-  // 🔍 FILTER PRODUCTS
-  // ===============================
+  // Filters
   const filteredProducts = products.filter((product) => {
     return (
-      (selectedCategory === "ALL" ||
-        product.category === selectedCategory) &&
+      (selectedCategory === "ALL" || product.category === selectedCategory) &&
       product.price <= price &&
       product.title.toLowerCase().includes(search.toLowerCase())
     );
   });
 
-  // ===============================
-  // 🧠 FILTER DEBUG LOGS
-  // ===============================
-  console.log("🎯 Filters:", {
-    category: selectedCategory,
-    price,
-    search,
-  });
-
-  console.log("📦 Filtered Products Count:", filteredProducts.length);
-
-  // ===============================
-  // ♻ RESET FILTERS
-  // ===============================
   const handleReset = () => {
-    console.log("🔄 Reset Filters");
     setSelectedCategory("ALL");
     setPrice(5000);
     setSearch("");
   };
 
-  // ===============================
-  // 🧩 STATES
-  // ===============================
+  // Handle add to cart
+  const handleAddToCart = (product) => {
+    addToCart(product, 1);
+  };
+
+  // States
   if (loading) return <LoadingState />;
   if (error) return <ErrorState error={error} onRetry={handleReset} />;
   if (products.length === 0) return <EmptyState />;
 
-  // ===============================
-  // 🖥 UI
-  // ===============================
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      {/* Mobile Filter Button */}
+      {/* Mobile filter toggle */}
       <div className="md:hidden mb-4">
         <button
           onClick={() => setIsOpen(!isOpen)}
@@ -115,6 +92,7 @@ export default function ProductsPage() {
         </button>
       </div>
 
+      {/* Mobile Filters */}
       <MobileFilters
         isOpen={isOpen}
         setIsOpen={setIsOpen}
@@ -129,6 +107,7 @@ export default function ProductsPage() {
       />
 
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-6">
+        {/* Desktop Sidebar */}
         <div className="hidden lg:block">
           <Sidebar
             categories={categories}
@@ -141,9 +120,13 @@ export default function ProductsPage() {
           />
         </div>
 
+        {/* Products Grid */}
         <div className="lg:col-span-3">
           {filteredProducts.length > 0 ? (
-            <ProductGrid products={filteredProducts} />
+            <ProductGrid
+              products={filteredProducts}
+              onAddToCart={handleAddToCart}
+            />
           ) : (
             <NoResults
               price={price}
