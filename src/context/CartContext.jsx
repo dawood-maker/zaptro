@@ -8,6 +8,7 @@ export const CartProvider = ({ children }) => {
   const [cartItems, setCartItems] = useState(() => {
     try {
       const savedCart = localStorage.getItem("zaptro-cart");
+      console.log("Loaded cart from localStorage:", savedCart); // ✅ Log initial cart
       return savedCart ? JSON.parse(savedCart) : [];
     } catch (error) {
       console.error("Error loading cart:", error);
@@ -18,6 +19,7 @@ export const CartProvider = ({ children }) => {
   // Save cart to localStorage whenever it changes
   useEffect(() => {
     try {
+      console.log("Saving cart to localStorage:", cartItems); // ✅ Log cart whenever it changes
       localStorage.setItem("zaptro-cart", JSON.stringify(cartItems));
     } catch (error) {
       console.error("Error saving cart:", error);
@@ -26,61 +28,79 @@ export const CartProvider = ({ children }) => {
 
   // Add to cart
   const addToCart = (product, quantity = 1) => {
+    console.log(`Adding to cart: ${product.title}, quantity: ${quantity}`); // ✅ Log add action
     setCartItems((prevItems) => {
       const existingItem = prevItems.find((item) => item.id === product.id);
 
       if (existingItem) {
-        return prevItems.map((item) =>
+        const updatedCart = prevItems.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
-            : item
+            : item,
         );
+        console.log("Updated cart after adding existing item:", updatedCart); // ✅ Log updated cart
+        return updatedCart;
       } else {
-        return [...prevItems, { ...product, quantity }];
+        const updatedCart = [...prevItems, { ...product, quantity }];
+        console.log("Updated cart after adding new item:", updatedCart); // ✅ Log updated cart
+        return updatedCart;
       }
     });
 
-    // Optional: show success alert
     alert(`${product.title} added to cart!`);
   };
 
   // Remove from cart
   const removeFromCart = (productId) => {
-    setCartItems((prevItems) =>
-      prevItems.filter((item) => item.id !== productId)
-    );
+    console.log(`Removing from cart: Product ID ${productId}`); // ✅ Log remove action
+    setCartItems((prevItems) => {
+      const updatedCart = prevItems.filter((item) => item.id !== productId);
+      console.log("Updated cart after removal:", updatedCart); // ✅ Log updated cart
+      return updatedCart;
+    });
   };
 
   // Update quantity
   const updateQuantity = (productId, newQuantity) => {
+    console.log(
+      `Updating quantity: Product ID ${productId}, New Quantity: ${newQuantity}`,
+    ); // ✅ Log quantity update
     if (newQuantity <= 0) {
+      console.log("Quantity is 0 or less, removing item");
       removeFromCart(productId);
       return;
     }
 
-    setCartItems((prevItems) =>
-      prevItems.map((item) =>
-        item.id === productId ? { ...item, quantity: newQuantity } : item
-      )
-    );
+    setCartItems((prevItems) => {
+      const updatedCart = prevItems.map((item) =>
+        item.id === productId ? { ...item, quantity: newQuantity } : item,
+      );
+      console.log("Updated cart after quantity change:", updatedCart); // ✅ Log updated cart
+      return updatedCart;
+    });
   };
 
   // Clear cart
   const clearCart = () => {
+    console.log("Clearing cart"); // ✅ Log clearing cart
     setCartItems([]);
   };
 
   // Get total items
   const getTotalItems = () => {
-    return cartItems.reduce((total, item) => total + item.quantity, 0);
+    const total = cartItems.reduce((total, item) => total + item.quantity, 0);
+    console.log("Total items in cart:", total); // ✅ Log total items
+    return total;
   };
 
   // Get total price
   const getTotalPrice = () => {
-    return cartItems.reduce(
+    const total = cartItems.reduce(
       (total, item) => total + item.price * item.quantity,
-      0
+      0,
     );
+    console.log("Total price of cart:", total); // ✅ Log total price
+    return total;
   };
 
   return (
@@ -107,10 +127,3 @@ export const useCart = () => {
   }
   return context;
 };
-
-
-
-
-
-
-
