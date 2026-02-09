@@ -13,7 +13,7 @@ function Checkout() {
   const [deliveryInfo, setDeliveryInfo] = useState({
     fullName: "",
     address: "",
-    state: "",
+    city: "",
     postCode: "",
     country: "",
     phoneNo: "",
@@ -44,14 +44,14 @@ function Checkout() {
           console.log("📍 Position detected:", position.coords);
           try {
             const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
             );
             const data = await response.json();
             console.log("🏠 Location data:", data);
             setDeliveryInfo((prev) => ({
               ...prev,
               address: data.display_name || "",
-              state: data.address?.state || "",
+              city: data.address?.city || "",
               postCode: data.address?.postcode || "",
               country: data.address?.country || "",
             }));
@@ -66,7 +66,7 @@ function Checkout() {
           console.error("❌ Geolocation error:", error);
           alert("Location access denied. Please enter manually.");
           setLoading(false);
-        },
+        }
       );
     } else {
       alert("Geolocation is not supported by your browser.");
@@ -74,14 +74,16 @@ function Checkout() {
     }
   };
 
+  // ✅ Updated handleSubmit
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log("📝 Submitting order with delivery info:", deliveryInfo);
 
+    // Replace deliveryInfo.state with deliveryInfo.city
     if (
       !deliveryInfo.fullName ||
       !deliveryInfo.address ||
-      !deliveryInfo.state ||
+      !deliveryInfo.city ||
       !deliveryInfo.postCode ||
       !deliveryInfo.country ||
       !deliveryInfo.phoneNo
@@ -136,9 +138,7 @@ function Checkout() {
         <div className="min-h-screen bg-gray-50 py-10">
           <div className="max-w-6xl mx-auto px-6">
             <div className="mb-8">
-              <h1 className="font-bold text-3xl text-gray-800 mb-2">
-                Checkout
-              </h1>
+              <h1 className="font-bold text-3xl text-gray-800 mb-2">Checkout</h1>
               <Link
                 to="/cart"
                 className="text-indigo-600 hover:underline font-semibold"
@@ -199,3 +199,4 @@ function Checkout() {
 }
 
 export default Checkout;
+ 

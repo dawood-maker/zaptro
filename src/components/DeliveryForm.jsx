@@ -48,9 +48,9 @@ function DeliveryForm({ deliveryInfo, setDeliveryInfo, handleSubmit, handleDetec
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
-            name="state"
-            placeholder="State"
-            value={deliveryInfo.state}
+            name="city"
+            placeholder="city"
+            value={deliveryInfo.city}
             onChange={handleInputChange}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
             required
