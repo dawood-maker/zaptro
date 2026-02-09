@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useCart } from "../context/CartContext";
+import { useUser } from "@clerk/clerk-react"; // For authentication
 
 import Sidebar from "../components/Sidebar";
 import ProductGrid from "../components/product/ProductGrid";
 import MobileFilters from "../components/FilterPanel/MobileFilter";
+import ProductCard from "../components/product/ProductCard";
 
 import LoadingState from "../components/states/LoadingState";
 import ErrorState from "../components/states/ErrorState";
@@ -12,6 +14,7 @@ import NoResults from "../components/states/NoResults";
 
 export default function Products() {
   const { addToCart } = useCart();
+  const { isSignedIn } = useUser(); // Check if user is signed in
 
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState(["ALL"]);
@@ -26,12 +29,14 @@ export default function Products() {
   useEffect(() => {
     async function fetchProducts() {
       try {
+        console.log("🔄 Fetching products...");
         setLoading(true);
 
         const res = await fetch("https://fakestoreapi.com/products");
         if (!res.ok) throw new Error("Failed to fetch products");
 
         const data = await res.json();
+        console.log("✅ Products fetched:", data);
 
         const mappedData = data.map((item) => ({
           id: item.id,
@@ -44,11 +49,17 @@ export default function Products() {
 
         setProducts(mappedData);
         setCategories(["ALL", ...new Set(mappedData.map((p) => p.category))]);
+        console.log("📦 Categories set:", [
+          "ALL",
+          ...new Set(mappedData.map((p) => p.category)),
+        ]);
         setError(null);
       } catch (err) {
+        console.error("❌ Error fetching products:", err);
         setError(err.message);
       } finally {
         setLoading(false);
+        console.log("⏳ Loading finished");
       }
     }
 
@@ -63,8 +74,10 @@ export default function Products() {
       product.title.toLowerCase().includes(search.toLowerCase())
     );
   });
+  console.log("🔍 Filtered products:", filteredProducts);
 
   const handleReset = () => {
+    console.log("🔄 Resetting filters");
     setSelectedCategory("ALL");
     setPrice(5000);
     setSearch("");
@@ -72,20 +85,39 @@ export default function Products() {
 
   // Handle add to cart
   const handleAddToCart = (product) => {
-    addToCart(product, 1);
+    console.log("🛒 Add to Cart clicked for:", product);
+    if (isSignedIn) {
+      console.log("✅ User signed in, adding product to cart...");
+      addToCart(product, 1);
+    } else {
+      console.log("⚠️ User not signed in, cannot add product");
+      alert("Please sign in to add items to the cart");
+    }
   };
 
   // States
-  if (loading) return <LoadingState />;
-  if (error) return <ErrorState error={error} onRetry={handleReset} />;
-  if (products.length === 0) return <EmptyState />;
+  if (loading) {
+    console.log("⏳ Loading state active");
+    return <LoadingState />;
+  }
+  if (error) {
+    console.log("❌ Error state active:", error);
+    return <ErrorState error={error} onRetry={handleReset} />;
+  }
+  if (products.length === 0) {
+    console.log("📭 Empty products state");
+    return <EmptyState />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       {/* Mobile filter toggle */}
       <div className="md:hidden mb-4">
         <button
-          onClick={() => setIsOpen(!isOpen)}
+          onClick={() => {
+            setIsOpen(!isOpen);
+            console.log(isOpen ? "🔒 Closing filters" : "🔓 Opening filters");
+          }}
           className="w-full py-2 bg-red-500 text-white rounded-xl font-semibold"
         >
           {isOpen ? "Close Filters" : "Open Filters"}
@@ -121,12 +153,15 @@ export default function Products() {
         </div>
 
         {/* Products Grid */}
-        <div className="lg:col-span-3">
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
           {filteredProducts.length > 0 ? (
-            <ProductGrid
-              products={filteredProducts}
-              onAddToCart={handleAddToCart}
-            />
+            filteredProducts.map((product) => (
+              <ProductCard
+                key={product.id}
+                item={product}
+                onAddToCart={handleAddToCart}
+              />
+            ))
           ) : (
             <NoResults
               price={price}

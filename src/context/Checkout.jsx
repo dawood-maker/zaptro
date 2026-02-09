@@ -3,9 +3,11 @@ import { useCart } from "../context/CartContext";
 import { Link, useNavigate } from "react-router-dom";
 import DeliveryForm from "../components/DeliveryForm";
 import CheckoutOrderSummary from "../components/CheckoutOrderSummary";
+import { SignedIn, SignedOut, SignInButton } from "@clerk/clerk-react";
 
 function Checkout() {
-  const { cartItems, getTotalPrice, getTotalItems, clearCart } = useCart();
+  const { cartItems, getTotalPrice, getTotalItems, clearCart, placeOrder } =
+    useCart();
   const navigate = useNavigate();
 
   const [deliveryInfo, setDeliveryInfo] = useState({
@@ -28,25 +30,24 @@ function Checkout() {
     return total;
   }, 0);
 
-  console.log("Cart Items:", cartItems); // ✅ Log cart items
-  console.log("Total Price:", totalPrice); // ✅ Log total price
-  console.log("Total Items:", totalItems); // ✅ Log total items
-  console.log("Total Savings:", totalSavings); // ✅ Log total savings
-  console.log("Delivery Info:", deliveryInfo); // ✅ Log delivery info state
+  console.log("📦 Cart Items:", cartItems);
+  console.log("🔢 Total Items:", totalItems);
+  console.log("💰 Total Price:", totalPrice);
+  console.log("💵 Total Savings:", totalSavings);
 
   const handleDetectLocation = () => {
+    console.log("📍 Detecting user location...");
     setLoading(true);
-    console.log("Detecting location..."); // ✅ Log when location detection starts
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         async (position) => {
-          console.log("Position detected:", position); // ✅ Log position
+          console.log("📍 Position detected:", position.coords);
           try {
             const response = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`,
             );
             const data = await response.json();
-            console.log("Reverse geocode data:", data); // ✅ Log API response
+            console.log("🏠 Location data:", data);
             setDeliveryInfo((prev) => ({
               ...prev,
               address: data.display_name || "",
@@ -55,20 +56,19 @@ function Checkout() {
               country: data.address?.country || "",
             }));
           } catch (error) {
-            console.error("Error detecting location:", error); // ✅ Log errors
+            console.error("❌ Failed to fetch location data:", error);
             alert("Could not detect location. Please enter manually.");
           } finally {
             setLoading(false);
           }
         },
         (error) => {
-          console.error("Geolocation error:", error); // ✅ Log geolocation errors
+          console.error("❌ Geolocation error:", error);
           alert("Location access denied. Please enter manually.");
           setLoading(false);
-        }
+        },
       );
     } else {
-      console.warn("Geolocation not supported"); // ✅ Warn if not supported
       alert("Geolocation is not supported by your browser.");
       setLoading(false);
     }
@@ -76,10 +76,7 @@ function Checkout() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submitting order..."); // ✅ Log submission start
-    console.log("Delivery Info:", deliveryInfo); // ✅ Log delivery info before submission
-    console.log("Cart Items at submission:", cartItems); // ✅ Log cart items at submission
-    console.log("Total Price at submission:", totalPrice); // ✅ Log total price at submission
+    console.log("📝 Submitting order with delivery info:", deliveryInfo);
 
     if (
       !deliveryInfo.fullName ||
@@ -89,32 +86,34 @@ function Checkout() {
       !deliveryInfo.country ||
       !deliveryInfo.phoneNo
     ) {
-      console.warn("Form incomplete"); // ✅ Warn if fields missing
+      console.warn("⚠️ Delivery info incomplete");
       alert("Please fill in all fields");
       return;
     }
+
+    console.log("✅ Placing order...");
+    placeOrder();
+    console.log("🛒 Order placed, cart cleared");
+
+    // Optional: send delivery info to backend
     try {
+      console.log("📡 Sending order data to backend...");
       const response = await fetch("YOUR_API_ENDPOINT", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ deliveryInfo, cartItems, totalPrice }),
       });
       const data = await response.json();
-      console.log("Order successful:", data); // ✅ Log successful response
-      alert(
-        `Order Placed Successfully!\n\nTotal: $${totalPrice.toFixed(
-          2
-        )}\nDelivering to: ${deliveryInfo.fullName}`
-      );
-      clearCart();
-      navigate("/");
+      console.log("✅ Order sent to backend:", data);
     } catch (error) {
-      console.error("Order failed:", error); // ✅ Log submission error
-      alert("Order failed. Please try again.");
+      console.error("❌ Failed to send order to backend:", error);
     }
+
+    navigate("/");
   };
 
   if (cartItems.length === 0) {
+    console.log("📭 Cart is empty");
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -132,37 +131,70 @@ function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="mb-8">
-          <h1 className="font-bold text-3xl text-gray-800 mb-2">Checkout</h1>
-          <Link to="/cart" className="text-indigo-600 hover:underline font-semibold">
-            ← Back to Cart
-          </Link>
-        </div>
+    <>
+      <SignedIn>
+        <div className="min-h-screen bg-gray-50 py-10">
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="mb-8">
+              <h1 className="font-bold text-3xl text-gray-800 mb-2">
+                Checkout
+              </h1>
+              <Link
+                to="/cart"
+                className="text-indigo-600 hover:underline font-semibold"
+              >
+                ← Back to Cart
+              </Link>
+            </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
-            <DeliveryForm
-              deliveryInfo={deliveryInfo}
-              setDeliveryInfo={setDeliveryInfo}
-              handleSubmit={handleSubmit}
-              handleDetectLocation={handleDetectLocation}
-              loading={loading}
-            />
-          </div>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2">
+                <DeliveryForm
+                  deliveryInfo={deliveryInfo}
+                  setDeliveryInfo={(info) => {
+                    console.log("✏️ Updating delivery info:", info);
+                    setDeliveryInfo(info);
+                  }}
+                  handleSubmit={handleSubmit}
+                  handleDetectLocation={handleDetectLocation}
+                  loading={loading}
+                />
+              </div>
 
-          <div className="lg:col-span-1">
-            <CheckoutOrderSummary
-              cartItems={cartItems}
-              totalItems={totalItems}
-              totalPrice={totalPrice}
-              totalSavings={totalSavings}
-            />
+              <div className="lg:col-span-1">
+                <CheckoutOrderSummary
+                  cartItems={cartItems}
+                  totalItems={totalItems}
+                  totalPrice={totalPrice}
+                  totalSavings={totalSavings}
+                />
+                <button
+                  onClick={handleSubmit}
+                  className="mt-4 w-full bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg font-semibold transition"
+                >
+                  Place Order
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
+      </SignedIn>
+
+      <SignedOut>
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center">
+            <h2 className="text-2xl font-semibold mb-4">
+              ❌ You must sign in to place an order
+            </h2>
+            <SignInButton mode="modal">
+              <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition">
+                Sign In
+              </button>
+            </SignInButton>
+          </div>
+        </div>
+      </SignedOut>
+    </>
   );
 }
 
