@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useData } from "../context/DataContext";
+import { useCart } from "../context/CartContext";
 
 import Loader from "../components/ui/Loader";
 import ErrorMessage from "../components/ui/ErrorMessage";
@@ -9,17 +10,18 @@ import ProductGrid from "../components/product/ProductGrid";
 
 const Category = () => {
   const { data, loading, error } = useData();
+  const { addToCart } = useCart(); // ✅ Cart function
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   if (loading) return <Loader text="Loading categories..." />;
   if (error) return <ErrorMessage error={error} />;
 
-  const categories = [...new Set(data.map((i) => i.category))];
+  const categories = [...new Set(data.map((item) => item.category))];
 
   const filteredProducts =
     selectedCategory === "all"
       ? data
-      : data.filter((i) => i.category === selectedCategory);
+      : data.filter((item) => item.category === selectedCategory);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -35,7 +37,11 @@ const Category = () => {
         setSelectedCategory={setSelectedCategory}
       />
 
-      <ProductGrid products={filteredProducts} />
+      {/* ✅ addToCart ProductGrid ko pass kiya */}
+      <ProductGrid
+        products={filteredProducts}
+        onAddToCart={addToCart}
+      />
     </div>
   );
 };

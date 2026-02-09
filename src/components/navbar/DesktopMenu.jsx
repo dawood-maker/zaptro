@@ -9,8 +9,8 @@ import NavLinks from "./NavLinks";
 import { useCart } from "../../context/CartContext";
 
 function DesktopMenu({ location, closeMenu }) {
-  // Get cart items from context
-  const { cartItems } = useCart(); // assuming your context returns an object with cartItems array
+  // ✅ SAFE DEFAULT (error fix)
+  const { cartItems = [] } = useCart();
 
   return (
     <>
@@ -18,7 +18,7 @@ function DesktopMenu({ location, closeMenu }) {
       <div className="hidden md:flex items-center gap-6 text-sm font-semibold">
         <NavLinks location={location} />
 
-        {/* Desktop Cart Button with Badge */}
+        {/* Desktop Cart Button */}
         <a
           href="/cart"
           className="relative flex items-center gap-2 px-4 py-2 rounded-lg bg-[#c2a46d] text-black font-semibold hover:bg-[#887248] transition"
@@ -62,7 +62,7 @@ function DesktopMenu({ location, closeMenu }) {
       <div className="md:hidden flex flex-col gap-4 mt-2">
         <NavLinks location={location} mobile />
 
-        {/* Mobile Cart Button with Badge */}
+        {/* Mobile Cart Button */}
         <a
           href="/cart"
           className="relative flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-[#c2a46d] text-black font-semibold hover:bg-yellow-400 transition"
