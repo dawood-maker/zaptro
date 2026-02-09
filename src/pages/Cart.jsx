@@ -24,36 +24,41 @@ function Cart() {
   }, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10">
-      <div className="max-w-6xl mx-auto px-6">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="font-bold text-3xl text-gray-800">
-            Order Products ({totalItems})
+    <div className="min-h-screen bg-gray-100 py-8 sm:py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-10 gap-4 sm:gap-0">
+          <h1 className="font-extrabold text-2xl sm:text-4xl text-gray-900 tracking-tight">
+            Your Cart ({totalItems})
           </h1>
           {cartItems.length > 0 && (
             <button
               onClick={clearCart}
-              className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-semibold transition"
+              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg font-semibold shadow-lg transition transform hover:-translate-y-0.5"
             >
               Clear Cart
             </button>
           )}
         </div>
 
+        {/* Empty Cart */}
         {cartItems.length === 0 ? (
-          <div className="text-center py-20">
-            <div className="text-6xl mb-4">🛒</div>
-            <p className="text-gray-500 text-xl mb-6">Your cart is empty</p>
+          <div className="text-center py-24">
+            <div className="text-7xl mb-6 animate-bounce">🛒</div>
+            <p className="text-gray-500 text-xl sm:text-2xl mb-6">
+              Your cart is empty
+            </p>
             <Link
               to="/products"
-              className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-lg font-semibold transition"
+              className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold shadow-lg transition transform hover:-translate-y-0.5"
             >
               Start Shopping
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2 space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-12">
+            {/* Cart Items */}
+            <div className="lg:col-span-2 space-y-6">
               {cartItems.map((item) => (
                 <CartItem
                   key={item.id}
@@ -63,11 +68,14 @@ function Cart() {
                 />
               ))}
             </div>
+
+            {/* Order Summary */}
             <div className="lg:col-span-1">
               <OrderSummary
                 totalItems={totalItems}
                 totalPrice={totalPrice}
                 totalSavings={totalSavings}
+                className="bg-white rounded-2xl shadow-xl p-6 sm:p-8"
               />
             </div>
           </div>
