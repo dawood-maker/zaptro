@@ -1,13 +1,17 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 
-//CartContext ek React context hai jo cart ka state aur functions provide karta hai.
-const CartContext = createContext(null);
+const CartContext = createContext();
 
-export const CartProvider = ({ children }) => {
+export function useCart() {
+  return useContext(CartContext);
+}
+
+export function CartProvider({ children }) {
   const { isSignedIn } = useUser();
 
-  const [cart, setCart] = useState(() => {
+  // Load cart from localStorage initially
+  const [cartItems, setCartItems] = useState(() => {
     try {
       const saved = localStorage.getItem("zaptro-cart");
       console.log("📦 Loaded cart from localStorage:", saved);
@@ -18,13 +22,12 @@ export const CartProvider = ({ children }) => {
     }
   });
 
-  // Save cart to localStorage
+  // Save cart to localStorage whenever it changes
   useEffect(() => {
-    console.log("💾 Saving cart to localStorage:", cart);
-    localStorage.setItem("zaptro-cart", JSON.stringify(cart));
-  }, [cart]);
+    console.log("💾 Saving cart to localStorage:", cartItems);
+    localStorage.setItem("zaptro-cart", JSON.stringify(cartItems));
+  }, [cartItems]);
 
-  // Add to cart
   const addToCart = (product, quantity = 1) => {
     if (!isSignedIn) {
       alert("❌ Please sign in to add items to cart");
@@ -32,48 +35,50 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    setCart((prev) => {
-      const existing = prev.find((i) => i.id === product.id);
-
+    setCartItems((prev) => {
+      const existing = prev.find((item) => item.id === product.id);
       if (existing) {
         console.log(
-          `✏️ Updating quantity for product:`,
-          product.id,
-          "by",
-          quantity,
+          `✏️ Updating quantity for product: ${product.id} by ${quantity}`,
         );
-        return prev.map((i) =>
-          i.id === product.id ? { ...i, quantity: i.quantity + quantity } : i,
+        return prev.map((item) =>
+          item.id === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item,
         );
+      } else {
+        console.log("➕ Adding new product to cart:", product);
+        return [...prev, { ...product, quantity }];
       }
-
-      console.log("➕ Adding new product to cart:", product);
-      return [...prev, { ...product, quantity }];
     });
   };
 
-  // Remove item
   const removeFromCart = (id) => {
     console.log("🗑 Removing item from cart:", id);
-    setCart((prev) => prev.filter((i) => i.id !== id));
+    setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
-  // Clear cart
+  const updateQuantity = (id, quantity) => {
+    setCartItems((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item,
+      ),
+    );
+  };
+
   const clearCart = () => {
     console.log("🧹 Clearing cart");
-    setCart([]);
+    setCartItems([]);
   };
 
-  // Total items
   const getTotalItems = () => {
-    const total = cart.reduce((total, item) => total + item.quantity, 0);
+    const total = cartItems.reduce((total, item) => total + item.quantity, 0);
     console.log("🔢 Total items in cart:", total);
     return total;
   };
 
-  // Total price
   const getTotalPrice = () => {
-    const total = cart.reduce(
+    const total = cartItems.reduce(
       (total, item) => total + item.price * item.quantity,
       0,
     );
@@ -81,7 +86,6 @@ export const CartProvider = ({ children }) => {
     return total;
   };
 
-  // Place order
   const placeOrder = () => {
     if (!isSignedIn) {
       alert("❌ You must be signed in to place an order");
@@ -89,13 +93,13 @@ export const CartProvider = ({ children }) => {
       return;
     }
 
-    if (cart.length === 0) {
+    if (cartItems.length === 0) {
       alert("🛒 Cart is empty");
       console.log("⚠️ Cart empty. Cannot place order.");
       return;
     }
 
-    console.log("✅ Order placed:", cart);
+    console.log("✅ Order placed:", cartItems);
     alert("✅ Order placed successfully!");
     clearCart();
   };
@@ -103,20 +107,17 @@ export const CartProvider = ({ children }) => {
   return (
     <CartContext.Provider
       value={{
-        cart,
-        cartItems: cart, // backward compatibility
+        cartItems,
         addToCart,
         removeFromCart,
+        updateQuantity,
         clearCart,
         getTotalItems,
         getTotalPrice,
-        placeOrder,
+        placeOrder, // new function added
       }}
     >
       {children}
     </CartContext.Provider>
   );
-};
-
-// useCart() ek custom hook hai jo aapko CartContext ka data aur functions use karne deta hai.
-export const useCart = () => useContext(CartContext);
+}
