@@ -28,7 +28,7 @@ function Cart() {
       <div className="max-w-6xl mx-auto px-6">
         <div className="flex justify-between items-center mb-8">
           <h1 className="font-bold text-3xl text-gray-800">
-            My Cart ({totalItems})
+            Order Products ({totalItems})
           </h1>
           {cartItems.length > 0 && (
             <button
