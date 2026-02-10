@@ -1,12 +1,13 @@
 import { useState } from "react";
-import { useData } from "../context/DataContext";
-import { useCart } from "../context/CartContext";
+import { useData } from "../context/DataContext"; //Custom hook, DataContext se data fetch karta hai
+import { useCart } from "../context/CartContext";  //Custom hook, CartContext se cart function access karta hai
 
 import Loader from "../components/ui/Loader";
 import ErrorMessage from "../components/ui/ErrorMessage";
 import CategoryHeader from "../components/category/CategoryHeader";
 import CategoryGrid from "../components/category/CategoryGrid";
 import ProductGrid from "../components/product/ProductGrid";
+
 
 const Category = () => {
   const { data, loading, error } = useData();
