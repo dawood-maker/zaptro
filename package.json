@@ -1,25 +1,31 @@
 {
-  "name": "reacte-10-projects",
-  "version": "0.1.0",
+  "name": "zaptro-admin-panel",
+  "version": "1.0.0",
+  "description": "Admin panel for Zaptro e-commerce",
   "private": true,
   "dependencies": {
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4",
+    "react-router-dom": "^7.13.0",
+    "axios": "^1.13.4",
+    "react-scripts": "5.0.1",
     "@clerk/clerk-react": "^5.60.0",
     "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^13.5.0",
-    "axios": "^1.13.4",
     "lucide-react": "^0.563.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
     "react-icons": "^5.5.0",
-    "react-router-dom": "^7.13.0",
-    "react-scripts": "5.0.1",
     "react-slick": "^0.31.0",
     "react-toastify": "^11.0.5",
     "slick-carousel": "^1.8.1",
     "sweetalert2": "^11.26.18",
     "web-vitals": "^2.1.4"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.24",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.19"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -45,9 +51,5 @@
       "last 1 safari version"
     ]
   },
-  "devDependencies": {
-    "autoprefixer": "^10.4.24",
-    "postcss": "^8.5.6",
-    "tailwindcss": "^3.4.19"
-  }
+  "proxy": "http://localhost:3005"
 }
