@@ -52,4 +52,4 @@ function MobileMenu({ location, closeMenu }) {
   );
 }
 
-export default MobileMenu;
+export default MobileMenu;  
