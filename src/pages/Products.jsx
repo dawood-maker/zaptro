@@ -3,7 +3,6 @@ import { useCart } from "../context/CartContext";
 import { useUser } from "@clerk/clerk-react"; // For authentication
 
 import Sidebar from "../components/Sidebar";
-import ProductGrid from "../components/product/ProductGrid";
 import MobileFilters from "../components/FilterPanel/MobileFilter";
 import ProductCard from "../components/product/ProductCard";
 
@@ -12,11 +11,29 @@ import ErrorState from "../components/states/ErrorState";
 import EmptyState from "../components/states/EmptyState";
 import NoResults from "../components/states/NoResults";
 
+// Static fallback products (used if API fails or for testing)
+const staticProducts = [
+  {
+    id: 1,
+    title: "Mens Jacket",
+    price: 55,
+    category: "CLOTHING",
+    image: "https://via.placeholder.com/200",
+  },
+  {
+    id: 2,
+    title: "Backpack",
+    price: 109,
+    category: "ACCESSORIES",
+    image: "https://via.placeholder.com/200",
+  },
+];
+
 export default function Products() {
   const { addToCart } = useCart();
   const { isSignedIn } = useUser(); // Check if user is signed in
 
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState(staticProducts);
   const [categories, setCategories] = useState(["ALL"]);
   const [selectedCategory, setSelectedCategory] = useState("ALL");
   const [price, setPrice] = useState(5000);
@@ -25,7 +42,7 @@ export default function Products() {
   const [error, setError] = useState(null);
   const [isOpen, setIsOpen] = useState(false);
 
-  // Fetch products
+  // Fetch products from API
   useEffect(() => {
     async function fetchProducts() {
       try {
@@ -49,14 +66,11 @@ export default function Products() {
 
         setProducts(mappedData);
         setCategories(["ALL", ...new Set(mappedData.map((p) => p.category))]);
-        console.log("📦 Categories set:", [
-          "ALL",
-          ...new Set(mappedData.map((p) => p.category)),
-        ]);
         setError(null);
       } catch (err) {
         console.error("❌ Error fetching products:", err);
         setError(err.message);
+        setProducts(staticProducts); // fallback to static products
       } finally {
         setLoading(false);
         console.log("⏳ Loading finished");

@@ -2,35 +2,54 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext"; // Your cart context
 import { useUser } from "@clerk/clerk-react"; // For auth check
+import Swal from "sweetalert2";
 
 const ProductCard = ({ item }) => {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { isSignedIn } = useUser();
 
+  // Handle adding product to cart
   const handleAddToCart = (e) => {
     e.stopPropagation(); // Prevent navigation when clicking button
     console.log("🛒 Add to Cart clicked for product:", item);
 
-    if (isSignedIn) {
-      console.log("✅ User is signed in. Adding to cart...");
-      addToCart(item);
-    } else {
+    if (!isSignedIn) {
       console.log("⚠️ User not signed in. Cannot add to cart.");
-      alert("Please sign in to add items to the cart");
+      Swal.fire({
+        title: "Sign in required",
+        text: "Please sign in to add items to the cart",
+        icon: "warning",
+        confirmButtonText: "OK",
+      });
+      return;
     }
+
+    // Show success alert and optionally navigate to cart
+    Swal.fire({
+      title: "Added to Cart!",
+      text: `${item.title} has been added.`,
+      icon: "success",
+      confirmButtonText: "Go to Cart",
+    }).then((result) => {
+      addToCart(item);
+      if (result.isConfirmed) {
+        navigate("/cart");
+      }
+    });
   };
 
+  // Navigate to product details page
   const handleNavigate = () => {
     console.log("➡️ Navigating to product page for:", item.id);
     navigate(`/product/${item.id}`);
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-transform duration-300 hover:-translate-y-3 group overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-transform duration-300 hover:-translate-y-3 group overflow-hidden cursor-pointer">
       {/* Image */}
       <div
-        className="h-52 sm:h-60 bg-gray-100 flex items-center justify-center p-4 relative cursor-pointer"
+        className="h-52 sm:h-60 bg-gray-100 flex items-center justify-center p-4 relative"
         onClick={handleNavigate}
       >
         <img

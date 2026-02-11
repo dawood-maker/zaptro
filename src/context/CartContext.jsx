@@ -1,13 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useUser } from "@clerk/clerk-react";
 
-const CartContext = createContext();
+export const CartContext = createContext();
 
 export function useCart() {
   return useContext(CartContext);
 }
 
-export function CartProvider({ children }) {
+export const CartProvider = ({ children }) => {
   const { isSignedIn } = useUser();
 
   // Load cart from localStorage initially
@@ -28,6 +28,7 @@ export function CartProvider({ children }) {
     localStorage.setItem("zaptro-cart", JSON.stringify(cartItems));
   }, [cartItems]);
 
+  // Add product to cart
   const addToCart = (product, quantity = 1) => {
     if (!isSignedIn) {
       alert("❌ Please sign in to add items to cart");
@@ -38,13 +39,11 @@ export function CartProvider({ children }) {
     setCartItems((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
-        console.log(
-          `✏️ Updating quantity for product: ${product.id} by ${quantity}`,
-        );
+        console.log(`✏️ Updating quantity for product: ${product.id} by ${quantity}`);
         return prev.map((item) =>
           item.id === product.id
             ? { ...item, quantity: item.quantity + quantity }
-            : item,
+            : item
         );
       } else {
         console.log("➕ Adding new product to cart:", product);
@@ -53,39 +52,45 @@ export function CartProvider({ children }) {
     });
   };
 
+  // Remove product from cart
   const removeFromCart = (id) => {
     console.log("🗑 Removing item from cart:", id);
     setCartItems((prev) => prev.filter((item) => item.id !== id));
   };
 
+  // Update product quantity
   const updateQuantity = (id, quantity) => {
     setCartItems((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item,
-      ),
+        item.id === id ? { ...item, quantity: Math.max(1, quantity) } : item
+      )
     );
   };
 
+  // Clear the entire cart
   const clearCart = () => {
     console.log("🧹 Clearing cart");
     setCartItems([]);
   };
 
+  // Get total items
   const getTotalItems = () => {
     const total = cartItems.reduce((total, item) => total + item.quantity, 0);
     console.log("🔢 Total items in cart:", total);
     return total;
   };
 
+  // Get total price
   const getTotalPrice = () => {
     const total = cartItems.reduce(
       (total, item) => total + item.price * item.quantity,
-      0,
+      0
     );
     console.log("💰 Total price of cart:", total);
     return total;
   };
 
+  // Place an order
   const placeOrder = () => {
     if (!isSignedIn) {
       alert("❌ You must be signed in to place an order");
@@ -114,10 +119,10 @@ export function CartProvider({ children }) {
         clearCart,
         getTotalItems,
         getTotalPrice,
-        placeOrder, // new function added
+        placeOrder,
       }}
     >
       {children}
     </CartContext.Provider>
   );
-}
+};
